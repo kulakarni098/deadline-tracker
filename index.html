@@ -1,0 +1,140 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadline Tracker</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .task {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f2f5;
+            border-radius: 10px;
+        }
+
+        .delete-btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>📅 Deadline Tracker</h1>
+        <p>Track your assignment and never miss a deadline.</p>
+        <input type="text" id="taskName" placeholder="Enter task name">
+
+        <input type="date" id="deadline">
+
+        <button onclick="addTask()">Add Deadline</button>
+
+        <div id="taskList"></div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        function calculateDaysLeft(deadline) {
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let deadlineDate = new Date(deadline);
+            deadlineDate.setHours(0, 0, 0, 0);
+
+            let difference = deadlineDate - today;
+
+            return Math.ceil(difference / (1000 * 60 * 60 * 24));
+        }
+
+        function displayTasks() {
+            let taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+
+            tasks.forEach(function(task, index) {
+                let daysLeft = calculateDaysLeft(task.deadline);
+
+                let taskElement = document.createElement("div");
+                taskElement.className = "task";
+
+                taskElement.innerHTML = `
+                    <strong>${task.name}</strong>
+                    <br>
+                    📅 Deadline: ${task.deadline}
+                    <br>
+                    ⏳ ${daysLeft} Days Left
+                    <button class="delete-btn" onclick="deleteTask(${index})">
+                        Delete
+                    </button>
+                `;
+
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        function addTask() {
+            let taskName = document.getElementById("taskName").value;
+            let deadline = document.getElementById("deadline").value;
+
+            if (taskName === "" || deadline === "") {
+                alert("Please enter task name and deadline");
+                return;
+            }
+
+            tasks.push({
+                name: taskName,
+                deadline: deadline
+            });
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            document.getElementById("taskName").value = "";
+            document.getElementById("deadline").value = "";
+
+            displayTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            displayTasks();
+        }
+
+        displayTasks();
+    </script>
+
+</body>
+</html>
